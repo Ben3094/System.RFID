@@ -10,7 +10,6 @@ namespace System.RFID.UHFEPC
 {
     public abstract class Reader : RFID.Reader
     {
-
         public const char READ_COMMAND = (char)0b11000010;
         //public virtual byte[] ReadMemory(Tag targetTag, Tag.MemoryBank memBank, int wordPtr, byte wordCount)
         //{

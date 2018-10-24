@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace System.RFID
 {
-    public abstract class TagModelNumberAttribute : Attribute
-    {
-        public abstract bool UIDCorrespond(byte[] uid);
+    //public abstract class TagModelNumberAttribute : Attribute
+    //{
+    //    public abstract bool UIDCorrespond(byte[] uid);
         
         //public const byte STANDARD_ISO15693_ALLOCATION_CLASS_IDENTIFIER = 0xE2;
 
@@ -52,10 +53,24 @@ namespace System.RFID
         //            throw new ArgumentException(TAG_MODEL_NUMBER_WRONG_LENGTH_MESSAGE);
         //    }
         //}
-    }
+    //}
 
-    public abstract class TagModelNumberAttribute2 : TagModelNumberAttribute
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+    public abstract class TagModelNumberAttribute : Attribute
     {
+        public abstract bool UIDCorrespond(byte[] uid);
+    }
+    //TODO: Avoid using Attribute and add field in Tag class
+
+    public class ClassicTagModelNumberAttribute : TagModelNumberAttribute
+    {
+        public ClassicTagModelNumberAttribute(bool?[] model)
+        {
+            this.MODEL = model;
+        }
+
+        public readonly bool?[] MODEL;
+
         public override bool UIDCorrespond(byte[] uid)
         {
             for (int bitIndex = 0; bitIndex < MODEL.Length; bitIndex++)
@@ -69,7 +84,5 @@ namespace System.RFID
             }
             return true;
         }
-
-        public static bool?[] MODEL;
     }
 }

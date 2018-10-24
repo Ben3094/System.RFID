@@ -12,8 +12,10 @@ namespace System.RFID
         public static readonly ObservableCollection<Tag> DetectedTags = new ObservableCollection<Tag>();
         public static Tag NotifyDetection(byte[] uid, Type baseTagType, DetectionSource newDetectionSource)
         {
+            //Search for tag types that were already searched,...
             Type[] availableTagTypes = null;
             try { availableTagTypes = AvailableTagTypes[baseTagType]; }
+            //...if not present, do search.
             catch (KeyNotFoundException)
             {
                 List<Type> derivatedTagTypes = new List<Type>();
@@ -22,14 +24,16 @@ namespace System.RFID
                 availableTagTypes = derivatedTagTypes.ToArray();
                 AvailableTagTypes.Add(baseTagType, availableTagTypes);
             }
+            //TODO: Not Resilient enough, it do not search for newly introduced types.
 
-            ushort tagMDID = (ushort)(((uid[2] & ((2 << 4) - 1)) << 8) | uid[3]);
-            ushort tagTMN = (ushort)((uid[4] << 4) | (uid[5] >> 4));
+            //ushort tagMDID = (ushort)(((uid[2] & ((2 << 4) - 1)) << 8) | uid[3]);
+            //ushort tagTMN = (ushort)((uid[4] << 4) | (uid[5] >> 4));
 
             Type tagType = availableTagTypes.First(t =>
             {
-                TagModelNumberAttribute tagModelNumberAttribute = ((TagModelNumberAttribute)t.GetCustomAttribute(typeof(TagModelNumberAttribute)));
-                return (tagModelNumberAttribute.MaskDesignerIdentifier == tagMDID) && (tagModelNumberAttribute.TagModelNumber == tagTMN) && (tagModelNumberAttribute.ISO15693AllocationClassIdentifier == uid[0]);
+                List<TagModelNumberAttribute> tagModelNumberAttributes = t.GetCustomAttributes(typeof(TagModelNumberAttribute)).Cast<TagModelNumberAttribute>().ToList();
+                return tagModelNumberAttributes.Any(tagModelNumberAttribute => tagModelNumberAttribute.UIDCorrespond(uid));
+                //return (tagModelNumberAttribute.MaskDesignerIdentifier == tagMDID) && (tagModelNumberAttribute.TagModelNumber == tagTMN) && (tagModelNumberAttribute.ISO15693AllocationClassIdentifier == uid[0]);
             });
 
             Tag detectedTag;

@@ -6,6 +6,7 @@ using System.Text;
 
 namespace System.RFID.UHFEPC
 {
+    [ClassicTagModelNumber(new bool[] { true, true, true, false, false, false, false, false })]
     public class Tag : RFID.Tag
     {
         public Tag(byte[] uid) : base(uid) { }
