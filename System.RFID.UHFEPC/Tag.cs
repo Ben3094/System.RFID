@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,10 +6,28 @@ using System.Text;
 
 namespace System.RFID.UHFEPC
 {
-    [ClassicTagModelNumber(new bool[] { true, true, true, false, false, false, false, false })]
     public class Tag : RFID.Tag
     {
-        public Tag(byte[] uid) : base(uid) { }
+        public const string WRONG_UID_INITIATION = "Not a genuine EPC tag";
+        public enum ISO15693ClassIdentifier
+        {
+            ISO7816 = 0xE0,
+            ISO14816 = 0xE1,
+            GS1 = 0xE2
+        }
+        public Tag(byte[] uid) : base(uid)
+        {
+            switch (uid[0])
+            {
+                case (byte)ISO15693ClassIdentifier.ISO7816:
+                case (byte)ISO15693ClassIdentifier.ISO14816:
+                case (byte)ISO15693ClassIdentifier.GS1:
+                    break;
+
+                default:
+                    throw new ArgumentException(WRONG_UID_INITIATION);
+            }
+        }
 
         public const byte MEMORY_BANK_MAX_VALUE = 0b11;
         public enum MemoryBank
@@ -33,9 +51,9 @@ namespace System.RFID.UHFEPC
 
         public enum ISO15693ClassIdentifier
         {
-            ISO7816 = 0b11100000,
-            ISO14816 = 0b11100001,
-            GS1 = 0b11100010
+            ISO7816 = 0xE0,
+            ISO14816 = 0xE1,
+            GS1 = 0xE2
         }
         public static byte GetISO15693ClassIdentifier(this byte[] TID) { return TID[0]; }
 
