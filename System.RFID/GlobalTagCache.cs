@@ -8,32 +8,40 @@ namespace System.RFID
     public static class GlobalTagCache
     {
         public static Dictionary<Type, Type[]> AvailableTagTypes = new Dictionary<Type, Type[]>();
+        public static void UpdateAvailableTagTypes()
+        {
+            UpdateAvailableTagTypes(typeof(Tag));
+        }
+        public static Type[] UpdateAvailableTagTypes(Type baseTagType)
+        {
+            IEnumerable<Type> availableTagTypes = new List<Type>();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                ((List<Type>)availableTagTypes).AddRange(Assembly.GetAssembly(baseTagType).GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
+            availableTagTypes = availableTagTypes.ToArray();
+            AvailableTagTypes.Add(baseTagType, ((Type[])availableTagTypes));
+            return ((Type[])availableTagTypes);
+        }
 
         public static readonly ObservableCollection<Tag> DetectedTags = new ObservableCollection<Tag>();
+
         public static Tag NotifyDetection(byte[] uid, Type baseTagType, DetectionSource newDetectionSource)
         {
             //Search for tag types that were already searched,...
-            Type[] availableTagTypes = null;
-            try { availableTagTypes = AvailableTagTypes[baseTagType]; }
+            Type[] correpondingTagTypes = null;
+            try { correpondingTagTypes = AvailableTagTypes[baseTagType]; }
             //...if not present, do search.
             catch (KeyNotFoundException)
-            {
-                List<Type> derivatedTagTypes = new List<Type>();
-                foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-                    derivatedTagTypes.AddRange(Assembly.GetAssembly(baseTagType).GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
-                availableTagTypes = derivatedTagTypes.ToArray();
-                AvailableTagTypes.Add(baseTagType, availableTagTypes);
-            }
+            { correpondingTagTypes = UpdateAvailableTagTypes(baseTagType); }
             //TODO: Not Resilient enough, it do not search for newly introduced types.
 
-            //ushort tagMDID = (ushort)(((uid[2] & ((2 << 4) - 1)) << 8) | uid[3]);
-            //ushort tagTMN = (ushort)((uid[4] << 4) | (uid[5] >> 4));
-
-            Type tagType = availableTagTypes.First(t =>
+            Type tagType = correpondingTagTypes.First(correspondingTagType =>
             {
+                try
+                {
+                    return Activator.CreateInstance(correspondingTagType, uid);
+                }
                 List<TagModelNumberAttribute> tagModelNumberAttributes = t.GetCustomAttributes(typeof(TagModelNumberAttribute)).Cast<TagModelNumberAttribute>().ToList();
                 return tagModelNumberAttributes.Any(tagModelNumberAttribute => tagModelNumberAttribute.UIDCorrespond(uid));
-                //return (tagModelNumberAttribute.MaskDesignerIdentifier == tagMDID) && (tagModelNumberAttribute.TagModelNumber == tagTMN) && (tagModelNumberAttribute.ISO15693AllocationClassIdentifier == uid[0]);
             });
 
             Tag detectedTag;

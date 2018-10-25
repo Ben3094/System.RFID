@@ -15,13 +15,19 @@ namespace System.RFID.UHFEPC
             ISO14816 = 0xE1,
             GS1 = 0xE2
         }
+        public readonly ISO15693ClassIdentifier ISO15693Class;
         public Tag(byte[] uid) : base(uid)
         {
             switch (uid[0])
             {
                 case (byte)ISO15693ClassIdentifier.ISO7816:
+                    this.ISO15693Class = ISO15693ClassIdentifier.ISO7816;
+                    break;
                 case (byte)ISO15693ClassIdentifier.ISO14816:
+                    this.ISO15693Class = ISO15693ClassIdentifier.ISO14816;
+                    break;
                 case (byte)ISO15693ClassIdentifier.GS1:
+                    this.ISO15693Class = ISO15693ClassIdentifier.GS1;
                     break;
 
                 default:
