@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.1.0</Version>
+    <PackageProjectUrl>https://github.com/Ben3094/System.RFID</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Ben3094/System.RFID/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>2018 Benjamin Saggin</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Company>Benjamin Saggin</Company>
+    <Product>BenDotNet.System.RFID</Product>
+  </PropertyGroup>
+
+</Project>

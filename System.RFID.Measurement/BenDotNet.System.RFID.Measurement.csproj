@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\System.RFID\System.RFID.csproj" />
+    <ProjectReference Include="..\System.RFID\BenDotNet.System.RFID.csproj" />
   </ItemGroup>
 
 </Project>
