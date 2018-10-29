@@ -26,68 +26,61 @@ namespace System.RFID
 
         public static Tag NotifyDetection(byte[] uid, Type baseTagType, DetectionSource newDetectionSource)
         {
-            //Search for tag types that were already searched,...
-            Type[] correpondingTagTypes = null;
-            try { correpondingTagTypes = AvailableTagTypes[baseTagType]; }
-            //...if not present, do search.
-            catch (KeyNotFoundException)
-            { correpondingTagTypes = UpdateAvailableTagTypes(baseTagType); }
-            //TODO: Not Resilient enough, it do not search for newly introduced types.
+            if (!baseTagType.IsSubclassOf(typeof(Tag))) throw new ArgumentException("Not a type of tag");
 
-            Type tagType = correpondingTagTypes.First(correspondingTagType =>
-            {
-                try
-                {
-                    return Activator.CreateInstance(correspondingTagType, uid);
-                }
-                List<TagModelNumberAttribute> tagModelNumberAttributes = t.GetCustomAttributes(typeof(TagModelNumberAttribute)).Cast<TagModelNumberAttribute>().ToList();
-                return tagModelNumberAttributes.Any(tagModelNumberAttribute => tagModelNumberAttribute.UIDCorrespond(uid));
-            });
-
-            Tag detectedTag;
+            //Search for corresponding tag
+            Tag tag = null;
             try
             {
-                detectedTag = DetectedTags.First(tag => tag.UID.SequenceEqual(uid));
-
-                //Cancel linking with previously detected tag if it is not the same type
-                //TODO: Create multi-type tags
-                Type previouslyDetectedTagType = detectedTag.GetType();
-                if (previouslyDetectedTagType != baseTagType)
-                    if (!previouslyDetectedTagType.IsSubclassOf(baseTagType))
-                        throw new InvalidOperationException();
+                tag = DetectedTags.First(detectedTag => detectedTag.UID == uid);
+                //TODO: Integrate multi-type tags
             }
             catch (InvalidOperationException)
             {
-                if (baseTagType.IsSubclassOf(typeof(Tag)))
+                //If it is the first time it is detected,...
+                //...search for tag types that were already searched,...
+                Type[] correpondingTagTypes = null;
+                try { correpondingTagTypes = AvailableTagTypes[baseTagType]; }
+                //...if not present, do search.
+                catch (KeyNotFoundException)
+                { correpondingTagTypes = UpdateAvailableTagTypes(baseTagType); }
+                //TODO: Not Resilient enough, it do not search for newly introduced types.
+
+                //Search for tag type that can initialize (UID correspond)
+                foreach (Type correspondingTagType in correpondingTagTypes)
                 {
-                    detectedTag = (Tag)Activator.CreateInstance(tagType, uid);
-                    DetectedTags.Add(detectedTag);
+                    try
+                    {
+                        tag = (Tag)Activator.CreateInstance(correspondingTagType, uid);
+                        break;
+                    }
+                    catch (Exception) { }
                 }
-                else
-                    throw new ArgumentException("Suggested type is not a tag type");
+                if (tag == null) throw new NotImplementedException("Tag type that support UID not found");
             }
 
             //Delete old detection source from the same antenna
             try
             {
-                DetectionSource previousDetectionSource = detectedTag.DetectionSources.First(detectionSource => detectionSource.Antenna == newDetectionSource.Antenna);
+                DetectionSource previousDetectionSource = tag.DetectionSources.First(detectionSource => detectionSource.Antenna == newDetectionSource.Antenna);
                 if (previousDetectionSource.Time < newDetectionSource.Time) //Check time order
                 {
-                    detectedTag.DetectionSources.Remove(previousDetectionSource);
-                    AddAndSortDetectionSource(ref detectedTag, newDetectionSource);
+                    tag.DetectionSources.Remove(previousDetectionSource);
+                    AddAndSortDetectionSource(ref tag, newDetectionSource);
                 }
                 //Else ignore the current detection as it is anterior of the already present one
             }
             catch (InvalidOperationException)
             {
-                AddAndSortDetectionSource(ref detectedTag, newDetectionSource);
+                AddAndSortDetectionSource(ref tag, newDetectionSource);
             }
 
             //Update original antenna port with detected tag
-            newDetectionSource.Antenna.ConnectedTags.Add(detectedTag);
+            newDetectionSource.Antenna.ConnectedTags.Add(tag);
 
-            return detectedTag;
+            return tag;
         }
+
         /// <summary>
         /// Add detection source to the tag, sorted by RSSI
         /// </summary>
