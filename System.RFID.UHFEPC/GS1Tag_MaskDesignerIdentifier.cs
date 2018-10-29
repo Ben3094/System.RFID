@@ -4,7 +4,7 @@ using System.Text;
 
 namespace System.RFID.UHFEPC
 {
-    public static partial class TIDParsing
+    public partial class GS1Tag : Tag
     {
         public enum MaskDesignerIdentifier
         {

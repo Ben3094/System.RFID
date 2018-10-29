@@ -33,7 +33,12 @@ namespace System.RFID
             try
             {
                 tag = DetectedTags.First(detectedTag => detectedTag.UID == uid);
+
                 //TODO: Integrate multi-type tags
+                //if (!(tag.GetType().IsSubclassOf(baseTagType)))
+                //{
+
+                //}
             }
             catch (InvalidOperationException)
             {
@@ -52,6 +57,8 @@ namespace System.RFID
                     try
                     {
                         tag = (Tag)Activator.CreateInstance(correspondingTagType, uid);
+
+                        //TODO: Do not break, create multitypetag if found several corresponding type
                         break;
                     }
                     catch (Exception) { }
