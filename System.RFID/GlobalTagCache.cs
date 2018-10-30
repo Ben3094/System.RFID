@@ -50,6 +50,7 @@ namespace System.RFID
                 catch (KeyNotFoundException)
                 { correpondingTagTypes = UpdateAvailableTagTypes(baseTagType); }
                 //TODO: Not Resilient enough, it do not search for newly introduced types.
+                //TODO: Correct multiple same type detection
 
                 //Search for tag type that can initialize (UID correspond)
                 foreach (Type correspondingTagType in correpondingTagTypes)
