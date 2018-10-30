@@ -17,6 +17,7 @@ namespace System.RFID
             IEnumerable<Type> availableTagTypes = new List<Type>();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                 ((List<Type>)availableTagTypes).AddRange(Assembly.GetAssembly(baseTagType).GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
+            availableTagTypes = availableTagTypes.Distinct();
             availableTagTypes = availableTagTypes.ToArray();
             AvailableTagTypes.Add(baseTagType, ((Type[])availableTagTypes));
             return ((Type[])availableTagTypes);
@@ -49,10 +50,10 @@ namespace System.RFID
                 //...if not present, do search.
                 catch (KeyNotFoundException)
                 { correpondingTagTypes = UpdateAvailableTagTypes(baseTagType); }
-                //TODO: Not Resilient enough, it do not search for newly introduced types.
-                //TODO: Correct multiple same type detection
+                //TODO: Not Resilient enough, it do not search for newly introduced types
 
                 //Search for tag type that can initialize (UID correspond)
+                //TODO: Place Subclass first to be initiated first
                 foreach (Type correspondingTagType in correpondingTagTypes)
                 {
                     try
