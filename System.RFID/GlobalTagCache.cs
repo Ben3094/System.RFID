@@ -16,18 +16,31 @@ namespace System.RFID
         {
             IEnumerable<Type> availableTagTypes = new List<Type>();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-                ((List<Type>)availableTagTypes).AddRange(Assembly.GetAssembly(baseTagType).GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
+                ((List<Type>)availableTagTypes).AddRange(assembly.GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
             availableTagTypes = availableTagTypes.Distinct();
+            availableTagTypes = availableTagTypes.OrderByDescending(type => ReccursiveSearchForBaseType(type, baseTagType));
             availableTagTypes = availableTagTypes.ToArray();
             AvailableTagTypes.Add(baseTagType, ((Type[])availableTagTypes));
             return ((Type[])availableTagTypes);
+        }
+
+        public static int ReccursiveSearchForBaseType(Type targetType, Type baseType)
+        {
+            int reccursion = 0;
+            Type previousType = targetType;
+            while (previousType != baseType)
+            {
+                previousType = previousType.BaseType;
+                reccursion++;
+            }
+            return reccursion;
         }
 
         public static readonly ObservableCollection<Tag> DetectedTags = new ObservableCollection<Tag>();
 
         public static Tag NotifyDetection(byte[] uid, Type baseTagType, DetectionSource newDetectionSource)
         {
-            if (!baseTagType.IsSubclassOf(typeof(Tag))) throw new ArgumentException("Not a type of tag");
+            if (!baseTagType.IsSubclassOf(typeof(Tag)) && (baseTagType != typeof(Tag))) throw new ArgumentException("Not a type of tag");
 
             //Search for corresponding tag
             Tag tag = null;

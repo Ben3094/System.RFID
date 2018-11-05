@@ -20,6 +20,10 @@ namespace System.RFID.UHFEPC
         {
             if (uid[0] != (byte)this.ISO15693Class)
                 throw new ArgumentException(String.Format(Tag.WRONG_UID_INITIATION, this.ISO15693Class));
+
+            //EPC verification
+            //TODO
+
         }
 
         public const byte MEMORY_BANK_MAX_VALUE = 0b11;
