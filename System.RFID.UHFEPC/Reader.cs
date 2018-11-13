@@ -47,7 +47,7 @@ namespace System.RFID.UHFEPC
         //    queryCommand.Add((byte)commandCode);
         //    BitStream queryCommandStream = new BitStream(queryCommand.ToArray());
         //    arguments.CopyStreamTo(queryCommandStream);
-            
+
 
         //    //TODO: Add handler and CRC
         //    BitStream response = this.Execute(targetTag, queryCommandStream); //Send the query
@@ -64,6 +64,12 @@ namespace System.RFID.UHFEPC
         //    }
         //    return null;
         //}
+
+        //public const float MIN_ALLOWED_FREQUENCY = 865 * 10 ^ 6;
+        //public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
+        //public override float[] AllowedFrequencies => Enumerable.Range((int)MIN_ALLOWED_FREQUENCY, (int)MAX_ALLOWED_FREQUENCY).Cast<float>().ToArray();
+
+        //public static readonly 
     }
 
     /// <summary>

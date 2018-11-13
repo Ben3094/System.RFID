@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.RFID
 {
-    public enum ReaderStatus { Unknown, Error, Disconnected, Connected }
+    public enum ReaderStatus { Unknown, Error, Disconnected, Connected } 
 
     public abstract class Reader : INotifyPropertyChanged
     {
@@ -13,7 +13,7 @@ namespace System.RFID
         {
             foreach (AntennaPort antennaPort in this.AntennaPorts)
                 antennaPort.ConnectedTags.CollectionChanged += ConnectedTags_CollectionChanged;
-            //this.OperationFrequencies = new RestrictedObservableCollection<float>(this.AllowedFrequencies);
+            //this.OperationFrequencies = new List<float>(this.AllowedFrequencies);
         }
 
         public ReaderStatus status;
@@ -26,7 +26,6 @@ namespace System.RFID
                 OnPropertyChanged();
             }
         }
-
 
         private void ConnectedTags_CollectionChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -63,6 +62,7 @@ namespace System.RFID
         public virtual void StartContinousInventory()
         {
             this.AutoInventoryTimer.Elapsed += AutoInventoryTimer_Tick;
+            this.AutoInventoryTimer.Interval = DEFAULT_DELAY_BETWEEN_INVENTORY.TotalMilliseconds;
             this.AutoInventoryTimer.Start();
         }
         public virtual void StopContinuousInventory() 
@@ -72,8 +72,8 @@ namespace System.RFID
         }
         public abstract IEnumerable<Tag> Inventory();
         
-        public abstract float[] AllowedFrequencies { get; }
-        public readonly Range<float> OperationFrequencies;
+        //public abstract float[] AllowedFrequencies { get; }
+        //public List<float> OperationFrequencies;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
