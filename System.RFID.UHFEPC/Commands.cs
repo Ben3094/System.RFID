@@ -13,6 +13,7 @@ namespace System.RFID.UHFEPC
     {
         public Command() { }
         public abstract CommandType Type { get; }
+        public abstract BitArray CommandCode { get; }
     }
 
     public abstract class Reply : System.RFID.Reply
@@ -110,6 +111,9 @@ namespace System.RFID.UHFEPC
     {
         public override CommandType Type => CommandType.Mandatory;
 
+        public const byte READ_COMMAND_CODE = 0b11000010;
+        public override BitArray CommandCode => new BitArray(READ_COMMAND_CODE);
+
         public byte WordCount = 0;
     }
     public class ReadReply : Reply
@@ -124,6 +128,9 @@ namespace System.RFID.UHFEPC
     {
         public override CommandType Type => CommandType.Mandatory;
 
+        public const byte WRITE_COMMAND_CODE = 0b11000100;
+        public override BitArray CommandCode => new BitArray(WRITE_COMMAND_CODE);
+
         public char Data;
     }
     public class WriteReply : Reply
@@ -135,16 +142,25 @@ namespace System.RFID.UHFEPC
     public class Kill : AccessCommand
     {
         public override CommandType Type => CommandType.Mandatory;
+
+        public const byte KILL_COMMAND_CODE = 0b11000100;
+        public override BitArray CommandCode => new BitArray(KILL_COMMAND_CODE);
     }
 
     public class Lock : AccessCommand
     {
         public override CommandType Type => CommandType.Mandatory;
+
+        public const byte LOCK_COMMAND_CODE = 0b11000101;
+        public override BitArray CommandCode => new BitArray(LOCK_COMMAND_CODE);
     }
 
     public class Access : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte ACCESS_COMMAND_CODE = 0b11000110;
+        public override BitArray CommandCode => new BitArray(ACCESS_COMMAND_CODE);
     }
 
     public class BlockWrite : MemoryAccessCommand
@@ -159,6 +175,9 @@ namespace System.RFID.UHFEPC
             }
         }
 
+        public const byte BLOCKWRITE_COMMAND_CODE = 0b11000111;
+        public override BitArray CommandCode => new BitArray(BLOCKWRITE_COMMAND_CODE);
+
         public char[] Data;
     }
     public class BlockWriteReply : Reply
@@ -170,66 +189,105 @@ namespace System.RFID.UHFEPC
     public class BlockErase : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte BLOCKERASE_COMMAND_CODE = 0b11001000;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class BlockPermalock : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte BLOCKPERMALOCK_COMMAND_CODE = 0b11001001;
+        public override BitArray CommandCode => new BitArray(BLOCKPERMALOCK_COMMAND_CODE);
     }
 
     public class Authenticate : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte AUTHENTICATE_COMMAND_CODE = 0b11010101;
+        public override BitArray CommandCode => new BitArray(AUTHENTICATE_COMMAND_CODE);
     }
 
     public class AuthComm : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte AUTHCOMM_COMMAND_CODE = 0b11010111;
+        public override BitArray CommandCode => new BitArray(AUTHCOMM_COMMAND_CODE);
     }
 
     public class SecureComm : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte SECURECOMM_COMMAND_CODE = 0b11010110;
+        public override BitArray CommandCode => new BitArray(SECURECOMM_COMMAND_CODE);
     }
 
     public class KeyUpdate : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000010;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class TagPrivilege : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000011;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class ReadBuffer : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte BLOCKERASE_COMMAND_CODE = 0b11010010;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class Untraceable : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000000;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class FileOpen : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const byte BLOCKERASE_COMMAND_CODE = 0b11010011;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class FileList : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000001;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class FilePrivilege : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000100;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
     public class FileSetup : AccessCommand
     {
         public override CommandType Type => CommandType.Optional;
+
+        public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000101;
+        public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
     #endregion
 }

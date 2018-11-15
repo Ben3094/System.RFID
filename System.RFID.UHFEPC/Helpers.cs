@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Data.HashFunction.CRC;
 
 namespace System.RFID.UHFEPC
 {
@@ -39,6 +40,13 @@ namespace System.RFID.UHFEPC
                 result += (value[i] & EBV_DATA_BITS_MASK) << (i * 7);
             }
             return result;
+        }
+
+        public static ICRCConfig DEFAULT_CRC16_METHOD = CRCConfig.CRC16_CCITTFALSE;
+        public static ushort GetCRC16(byte[] value)
+        {
+            byte[] crcPieces = CRCFactory.Instance.Create(DEFAULT_CRC16_METHOD).ComputeHash(value).Hash;
+            return (ushort)(crcPieces[1] | (crcPieces[0] >> 8));
         }
         #endregion
     }

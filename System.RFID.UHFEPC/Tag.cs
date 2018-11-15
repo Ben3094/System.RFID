@@ -35,10 +35,10 @@ namespace System.RFID.UHFEPC
             User = 0b11
         }
 
-        //public byte[] Execute(byte GS1EPCCommand, bool[] arguments)
-        //{
-        //    this.DetectingAntennas[0].ContainerReader.Execute(this, arguments);
-        //}
+        public byte[] Execute(byte GS1EPCCommand, bool[] arguments)
+        {
+            this.DetectingAntennas[0].ContainerReader.Execute(this, arguments);
+        }
         public override Stream Memory => throw new NotImplementedException();
     }
 }
