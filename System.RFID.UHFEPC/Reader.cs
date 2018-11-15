@@ -4,17 +4,19 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Data.HashFunction.CRC;
+using System.Numerics.Range;
 
 namespace System.RFID.UHFEPC
 {
     public abstract class Reader : RFID.Reader
     {
-        public const char READ_COMMAND = (char)0b11000010;
+        //public const char READ_COMMAND = (char)0b11000010;
         //public virtual byte[] ReadMemory(Tag targetTag, Tag.MemoryBank memBank, int wordPtr, byte wordCount)
         //{
-        //    //byte[] EBVWordPtr = GetExtensibleBitVector(wordPtr);
-        //    //byte[] arguments = (new byte[] { (byte)Tag.MemoryBank.User }).Concat(EBVWordPtr).Concat(new byte[] { wordCount }).ToArray();
-        //    //return ExecuteAccessCommand(targetTag, READ_COMMAND, arguments);
+        //    byte[] EBVWordPtr = Helpers.CompileExtensibleBitVector(wordPtr);
+        //    byte[] arguments = (new byte[] { (byte)Tag.MemoryBank.User }).Concat(EBVWordPtr).Concat(new byte[] { wordCount }).ToArray();
+        //    return ExecuteAccessCommand(targetTag, READ_COMMAND, arguments);
         //}
         //public virtual byte[] ExecuteAccessCommand(Tag targetTag, char commandCode, byte[] arguments)
         //{
@@ -28,6 +30,7 @@ namespace System.RFID.UHFEPC
         //    byte[] response = this.Execute(targetTag, query); //Send the query
 
         //    //Parse response
+        //    if (response[0] == crc)
         //    if (response[0] != 0) //Detect error
         //    {
         //        if (response[0] == 1) //GS1 error signal
@@ -65,9 +68,9 @@ namespace System.RFID.UHFEPC
         //    return null;
         //}
 
-        //public const float MIN_ALLOWED_FREQUENCY = 865 * 10 ^ 6;
-        //public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
-        //public override float[] AllowedFrequencies => Enumerable.Range((int)MIN_ALLOWED_FREQUENCY, (int)MAX_ALLOWED_FREQUENCY).Cast<float>().ToArray();
+        public const float MIN_ALLOWED_FREQUENCY = 865 * 10 ^ 6;
+        public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
+        public override Range<float> AllowedFrequencies => new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY);
 
         //public static readonly 
     }

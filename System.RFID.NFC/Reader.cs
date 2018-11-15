@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics.Range;
 
 namespace System.RFID.NFC
 {
@@ -16,8 +17,8 @@ namespace System.RFID.NFC
             throw new NotImplementedException();
         }
 
-        //public const float MIN_ALLOWED_FREQUENCY = 860 * 10 ^ 6;
-        //public const float MAX_ALLOWED_FREQUENCY = 960 * 10 ^ 6;
-        //public override float[] AllowedFrequencies => Enumerable.Range((int)MIN_ALLOWED_FREQUENCY, (int)MAX_ALLOWED_FREQUENCY).Cast<float>().ToArray();
+        public const float MIN_ALLOWED_FREQUENCY = 13533 * 10 ^ 3;
+        public const float MAX_ALLOWED_FREQUENCY = 13567 * 10 ^ 3;
+        public override Range<float> AllowedFrequencies => new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY);
     }
 }

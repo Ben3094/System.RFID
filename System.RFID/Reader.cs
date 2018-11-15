@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Numerics.Range;
 
 namespace System.RFID
 {
@@ -72,8 +73,8 @@ namespace System.RFID
         }
         public abstract IEnumerable<Tag> Inventory();
         
-        //public abstract float[] AllowedFrequencies { get; }
-        //public List<float> OperationFrequencies;
+        public abstract Range<float> AllowedFrequencies { get; }
+        public List<Range<float>> OperationFrequencies;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
