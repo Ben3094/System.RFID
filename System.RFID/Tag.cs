@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace System.RFID
@@ -19,21 +20,23 @@ namespace System.RFID
         public readonly ObservableCollection<DetectionSource> DetectionSources = new ObservableCollection<DetectionSource>();
         //TODO: Always sort detecting antennas by best signal quality
 
-        //public byte[] Execute(byte[] command)
-        //{
-        //    return this.DetectingAntennas[0].ContainerReader.Execute(this, command);
-        //}
+        public Reply Execute(Command command)
+        {
+            return this.DetectionSources.First().Antenna.ContainerReader.Execute(this, command);
+        }
         #endregion
 
         #region MEMORY
         public abstract Stream Memory { get; }
         #endregion
 
+        #region PROPERTIES CHANGED EVENT HANDLER
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
     }
 
     public class MultiTypeTag : Tag
