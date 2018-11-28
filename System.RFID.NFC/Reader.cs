@@ -19,6 +19,6 @@ namespace System.RFID.NFC
 
         public const float MIN_ALLOWED_FREQUENCY = 13533 * 10 ^ 3;
         public const float MAX_ALLOWED_FREQUENCY = 13567 * 10 ^ 3;
-        public override Range<float> AllowedFrequencies => new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY);
+        public override List<Range<float>> AllowedFrequencies => new List<Range<float>>() { new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY) };
     }
 }

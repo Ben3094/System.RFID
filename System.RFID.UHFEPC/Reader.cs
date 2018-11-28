@@ -70,9 +70,7 @@ namespace System.RFID.UHFEPC
 
         public const float MIN_ALLOWED_FREQUENCY = 865 * 10 ^ 6;
         public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
-        public override Range<float> AllowedFrequencies => new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY);
-
-        //public static readonly 
+        public override List<Range<float>> AllowedFrequencies => new List<Range<float>>() { new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY) };
     }
 
     /// <summary>
