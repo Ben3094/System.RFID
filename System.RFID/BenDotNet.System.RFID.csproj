@@ -12,4 +12,10 @@
     <Product>BenDotNet.System.RFID</Product>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Range">
+      <HintPath>..\..\..\System.Numerics.Range\System.Numerics.Range\Range\src\Range\bin\Debug\netstandard2.0\Range.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

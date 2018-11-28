@@ -18,4 +18,10 @@
     <ProjectReference Include="..\System.RFID\BenDotNet.System.RFID.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Range">
+      <HintPath>..\..\..\System.Numerics.Range\System.Numerics.Range\Range\src\Range\bin\Debug\netstandard2.0\Range.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
