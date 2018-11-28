@@ -12,8 +12,6 @@ namespace System.RFID.UHFEPC
         //public const float MIN_ALLOWED_FREQUENCY = 865 * 10 ^ 6;
         //public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
         //public override float[] AllowedFrequencies => Enumerable.Range((int)MIN_ALLOWED_FREQUENCY, (int)MAX_ALLOWED_FREQUENCY).Cast<float>().ToArray();
-
-        //public static readonly 
     }
 
     /// <summary>
