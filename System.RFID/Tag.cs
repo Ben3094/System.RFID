@@ -39,12 +39,12 @@ namespace System.RFID
         #endregion
     }
 
-    public class MultiTypeTag : Tag
-    {
-        internal MultiTypeTag(byte[] uid) : base(uid) { }
+    //public class MultiTypeTag : Tag
+    //{
+    //    internal MultiTypeTag(byte[] uid) : base(uid) { }
 
-        public ObservableCollection<Tag> Value = new ObservableCollection<Tag>();
+    //    public ObservableCollection<Tag> Value = new ObservableCollection<Tag>();
 
-        public override Stream Memory => throw new NotImplementedException();
-    }
+    //    public override Stream Memory => throw new NotImplementedException();
+    //}
 }

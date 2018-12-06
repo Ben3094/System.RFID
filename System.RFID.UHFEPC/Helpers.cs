@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Data.HashFunction.CRC;
 
@@ -47,6 +48,38 @@ namespace System.RFID.UHFEPC
         {
             byte[] crcPieces = CRCFactory.Instance.Create(DEFAULT_CRC16_METHOD).ComputeHash(value).Hash;
             return (ushort)(crcPieces[1] | (crcPieces[0] >> 8));
+        }
+        #endregion
+
+        #region Word conversion
+        public static IEnumerable<byte> GetBytesFromWords(IEnumerable<char> words)
+        {
+            foreach (char word in words)
+            {
+                byte[] bytes = BitConverter.GetBytes(word);
+                yield return bytes[0];
+                yield return bytes[1];
+            }
+        }
+
+        public static IEnumerable<char> GetWordsFromBytes(IEnumerable<byte> bytes, byte missingByteCompletion = 0)
+        {
+            if (IsMissingByteForConvertionInWords(bytes))
+            {
+                bytes = new List<byte>(bytes);
+                ((List<byte>)bytes).Add(missingByteCompletion);
+            }
+            IEnumerator<byte> enumerator = bytes.GetEnumerator();
+            char temp = (char)(enumerator.Current << 8);
+            enumerator.MoveNext();
+            yield return (char)(temp | (char)enumerator.Current);
+            if (!enumerator.MoveNext())
+                yield break;
+        }
+
+        public static bool IsMissingByteForConvertionInWords(IEnumerable<byte> bytes)
+        {
+            return (bytes.Count() & 1) != 1;
         }
         #endregion
     }

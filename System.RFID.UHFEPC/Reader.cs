@@ -72,17 +72,4 @@ namespace System.RFID.UHFEPC
         public const float MAX_ALLOWED_FREQUENCY = 928 * 10 ^ 6;
         public override List<Range<float>> AllowedFrequencies => new List<Range<float>>() { new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY) };
     }
-
-    /// <summary>
-    /// 4 most-significant bits of the 8-bits "Cryptography Suite Indicator" (CSI) used by Challenge and Authenticate commands
-    /// </summary>
-    public enum CryptographicSuiteAssigningAuthority
-    {
-        ISO29167_1 = 0b00000000,
-        ISO29167_2 = 0b00010000,
-        ISO29167_3 = 0b00100000,
-        ISO29167_4 = 0b00110000,
-        TagManufacturer = 0b11010000,
-        GS1 = 0b11100000
-    }
 }

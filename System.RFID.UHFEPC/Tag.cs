@@ -26,15 +26,9 @@ namespace System.RFID.UHFEPC
 
         }
 
-        public const byte MEMORY_BANK_MAX_VALUE = 0b11;
-        public enum MemoryBank
+        public override Stream Memory
         {
-            Reserved = 0b00,
-            EPC = 0b01,
-            TID = 0b10,
-            User = 0b11
+            get => throw new NotImplementedException();
         }
-
-        public override Stream Memory => throw new NotImplementedException();
     }
 }
