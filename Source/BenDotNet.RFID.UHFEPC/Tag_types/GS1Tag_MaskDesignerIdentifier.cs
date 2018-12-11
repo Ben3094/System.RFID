@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public partial class GS1Tag : Tag
     {

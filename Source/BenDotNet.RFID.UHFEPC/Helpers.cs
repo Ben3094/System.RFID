@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Data.HashFunction.CRC;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public static class Helpers
     {

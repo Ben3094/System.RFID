@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     #region Core definition
     public enum CommandType { Mandatory, Optional, Proprietary, Custom }
 
-    public abstract class GS1Command : System.RFID.Command
+    public abstract class GS1Command : BenDotNet.RFID.UHFEPC.Command
     {
         public GS1Command() { }
         public abstract CommandType Type { get; }
         public abstract BitArray CommandCode { get; }
     }
 
-    public abstract class GS1Reply : System.RFID.Reply
+    public abstract class GS1Reply : BenDotNet.RFID.UHFEPC.Reply
     {
         public GS1Reply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
         public GS1Reply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }

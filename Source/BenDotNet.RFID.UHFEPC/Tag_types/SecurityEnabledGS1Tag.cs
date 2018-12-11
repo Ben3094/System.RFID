@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public class SecuredGS1Tag : GS1Tag
     {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public enum AntennaPortStatus { Unknown, Floating, Grounded, Connected }
     public abstract class AntennaPort : INotifyPropertyChanged

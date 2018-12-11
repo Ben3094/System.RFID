@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public class DetectionSource
     {

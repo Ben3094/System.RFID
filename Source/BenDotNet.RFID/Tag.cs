@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     //TODO: Plan conversion between tag type and handle transfer between reader (a UHF tag can have a HF antenna too and the user can use multiple reader)
     public abstract class Tag : INotifyPropertyChanged

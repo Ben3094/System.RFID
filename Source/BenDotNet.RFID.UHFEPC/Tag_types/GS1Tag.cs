@@ -1,9 +1,9 @@
 using System.Linq;
 using System.IO;
-using System.Numerics.Range;
 using System.Collections.Generic;
+using BenDotNet.Numerics;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public partial class GS1Tag : Tag
     {
@@ -30,6 +30,8 @@ namespace System.RFID.UHFEPC
             }
 
             //TODO: Check permalock of TID memory
+
+            this.UserMemoryBankStream = new MemoryBankStream(this, MemoryBank.User);
         }
 
         public const byte EXTENDED_TID_FLAG_INDEX = 0x08;
@@ -146,15 +148,16 @@ namespace System.RFID.UHFEPC
             }
             set => this.userMemoryBankLimits = value;
         }
+        public readonly MemoryBankStream UserMemoryBankStream;
 
         private void getMemoryBanksLimits()
         {
             this.reservedMemoryBankLimits = new Range<int>(RESERVED_MEMORY_BANK_OFFSET, this.getMemoryBankSize(MemoryBank.Reserved));
-            int EPC_MEMORY_BANK_OFFSET = reservedMemoryBankLimits.Ceiling + 1;
+            int EPC_MEMORY_BANK_OFFSET = reservedMemoryBankLimits.MaxValue + 1;
             this.epcMemoryBankLimits = new Range<int>(EPC_MEMORY_BANK_OFFSET, EPC_MEMORY_BANK_OFFSET + this.getMemoryBankSize(MemoryBank.EPC));
-            int TID_MEMORY_BANK_OFFSET = epcMemoryBankLimits.Ceiling + 1;
+            int TID_MEMORY_BANK_OFFSET = epcMemoryBankLimits.MaxValue + 1;
             this.tidMemoryBankLimits = new Range<int>(TID_MEMORY_BANK_OFFSET, this.getMemoryBankSize(MemoryBank.TID));
-            int USER_MEMORY_BANK_OFFSET = tidMemoryBankLimits.Ceiling + 1;
+            int USER_MEMORY_BANK_OFFSET = tidMemoryBankLimits.MaxValue + 1;
             this.userMemoryBankLimits = new Range<int>(USER_MEMORY_BANK_OFFSET, this.getMemoryBankSize(MemoryBank.User));
         }
         private int getMemoryBankSize(MemoryBank memoryBank)
@@ -211,28 +214,44 @@ namespace System.RFID.UHFEPC
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            float wordsOffset = (float)offset / 2;
-            float wordsCount = (float)count / 2;
-            byte memoryQueryTurn = 0;
+            int originalWordsOffset = offset / 2;
+            int wordsOffset = originalWordsOffset;
+            int wordsCount = count / 2;
+            bool hasPreviousHalfWord = wordsOffset != (float)(offset / 2f);
+            bool hasAfterHalfWord = wordsCount != (float)(count / 2f);
+
             try
             {
+                if (hasPreviousHalfWord)
+                {
+                    Array.Copy(readWord(wordsOffset, 1).ToArray(), 1, buffer, 0, 1);
+                    wordsOffset++;
+                }
+
                 //Maximum word memory readable for a command
-                for (; memoryQueryTurn < ((count / byte.MaxValue) - 1); memoryQueryTurn++)
-                    readWord(memoryQueryTurn * byte.MaxValue).ToArray().CopyTo(buffer, memoryQueryTurn * byte.MaxValue);
-                
+                for (; wordsOffset < wordsOffset + ((wordsCount / byte.MaxValue) * wordsCount); wordsOffset += byte.MaxValue)
+                    readWord(wordsOffset).ToArray().CopyTo(buffer, wordsOffset - originalWordsOffset);
+
                 //Uncomplete value of memory 
-                readWord(memoryQueryTurn * byte.MaxValue, (byte)(count % byte.MaxValue)).ToArray().CopyTo(buffer, memoryQueryTurn * byte.MaxValue);
+                IEnumerable<byte> BYTES = readWord(wordsOffset, (byte)(wordsCount % byte.MaxValue));
+                BYTES.ToArray().CopyTo(buffer, wordsOffset - originalWordsOffset);
+
+                if (hasAfterHalfWord)
+                {
+                    wordsOffset += BYTES.Count();
+                    buffer[wordsOffset - originalWordsOffset] = readWord(wordsOffset, 1).Last();
+                }
             }
-            catch (IndexOutOfRangeException) { }
-            return memoryQueryTurn * byte.MaxValue;
+            catch (IndexOutOfRangeException) {  }
+
+            return ((wordsOffset - originalWordsOffset) * 2)
+                - (hasPreviousHalfWord ? 1 : 0)
+                + (hasAfterHalfWord ? 1 : 0);
 
             IEnumerable<byte> readWord(int readWordOffset, byte wordCount = byte.MaxValue)
             {
                 ReadCommand readCommand = new ReadCommand(this.memoryBank, readWordOffset, wordCount);
                 ReadReply readReply = (ReadReply)this.tag.Execute(readCommand);
-
-                //TODO: Delete the last byte in word if not needed
-
                 return Helpers.GetBytesFromWords(readReply.MemoryWords);
             }
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace System.RFID.NFC
+namespace BenDotNet.RFID.NFC
 {
     public class Tag : RFID.Tag
     {

@@ -2,9 +2,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Numerics.Range;
+using BenDotNet.Numerics;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public enum ReaderStatus { Unknown, Error, Disconnected, Connected } 
 

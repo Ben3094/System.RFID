@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public abstract class Tag : RFID.Tag
     {

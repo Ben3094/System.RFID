@@ -11,17 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BenDotNet.Numerics.Range" Version="1.0.0" />
     <PackageReference Include="System.Data.HashFunction.CRC" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\System.RFID\BenDotNet.System.RFID.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Range">
-      <HintPath>..\..\..\System.Numerics.Range\System.Numerics.Range\Range\src\Range\bin\Debug\netstandard2.0\Range.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\BenDotNet.RFID\BenDotNet.RFID.csproj" />
   </ItemGroup>
 
 </Project>

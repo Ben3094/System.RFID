@@ -5,9 +5,9 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Data.HashFunction.CRC;
-using System.Numerics.Range;
+using BenDotNet.Numerics;
 
-namespace System.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC
 {
     public abstract class Reader : RFID.Reader
     {

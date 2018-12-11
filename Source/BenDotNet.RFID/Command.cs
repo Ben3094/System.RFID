@@ -4,7 +4,7 @@ using System.Text;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public abstract class Command : INotifyPropertyChanged
     {

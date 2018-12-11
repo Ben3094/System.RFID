@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics.Range;
 
-namespace System.RFID.NFC
+namespace BenDotNet.RFID.NFC
 {
     public abstract class Reader : RFID.Reader
     {        

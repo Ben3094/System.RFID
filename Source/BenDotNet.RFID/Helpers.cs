@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public static class Helpers
     {

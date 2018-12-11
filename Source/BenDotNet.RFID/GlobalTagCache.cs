@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
-namespace System.RFID
+namespace BenDotNet.RFID
 {
     public static class GlobalTagCache
     {
