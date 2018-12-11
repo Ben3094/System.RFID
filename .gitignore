@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /Documentation/NFC Specification
 /Documentation/TID_manufacturer_list.txt
+/Documentation/NFC
