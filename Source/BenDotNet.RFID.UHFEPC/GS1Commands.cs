@@ -243,9 +243,9 @@ namespace BenDotNet.RFID.UHFEPC
         public const byte WRITE_COMMAND_CODE = 0b11000100;
         public override BitArray CommandCode => new BitArray(WRITE_COMMAND_CODE);
 
-        public WriteCommand(GS1Tag.MemoryBank memoryBank, ref char[] data, int offset = 0) : base(memoryBank) { this.Data = data; }
+        public WriteCommand(GS1Tag.MemoryBank memoryBank, ref char data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
 
-        public char[] Data;
+        public readonly char Data;
     }
 
     [ReplyType(typeof(ReqRNReply))]
@@ -275,21 +275,17 @@ namespace BenDotNet.RFID.UHFEPC
         public override BitArray CommandCode => new BitArray(ACCESS_COMMAND_CODE);
     }
 
+    [ReplyType(typeof(DelayedTagReply))]
     public class BlockWriteCommand : BaseMemoryAccessCommand
     {
         public override CommandType Type => CommandType.Optional;
         public const byte BLOCKWRITE_COMMAND_CODE = 0b11000111;
         public override BitArray CommandCode => new BitArray(BLOCKWRITE_COMMAND_CODE);
 
-        public BlockWriteCommand(GS1Tag.MemoryBank memoryBank, char[] data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
+        public BlockWriteCommand(GS1Tag.MemoryBank memoryBank, ref char[] data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
 
         public byte WordCount { get { return (byte)this.Data.Length; } }
         public readonly char[] Data;
-    }
-    public class BlockWriteReply : GS1Reply
-    {
-        public BlockWriteReply(ref object originalReply, ref RFID.Command associatedCommand) : base(ref associatedCommand, ref originalReply) { }
-        static BlockWriteReply() { AssociatedCommandType = typeof(BlockWriteReply); }
     }
 
     [ReplyType(typeof(DelayedTagReply))]
@@ -300,7 +296,7 @@ namespace BenDotNet.RFID.UHFEPC
         public const byte BLOCKERASE_COMMAND_CODE = 0b11001000;
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
-
+    
     public class BlockPermalockCommand : BaseAccessCommand
     {
         public override CommandType Type => CommandType.Optional;

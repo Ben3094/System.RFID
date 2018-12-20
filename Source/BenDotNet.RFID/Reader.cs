@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Timers;
 using BenDotNet.Numerics;
 
 namespace BenDotNet.RFID
@@ -28,7 +30,7 @@ namespace BenDotNet.RFID
             }
         }
 
-        private void ConnectedTags_CollectionChanged(object sender, Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ConnectedTags_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             foreach (Tag addedTag in e.NewItems)
                 this.ConnectedTags.Add(addedTag);
@@ -58,8 +60,8 @@ namespace BenDotNet.RFID
         public abstract IEnumerable<AntennaPort> AntennaPorts { get; }
 
         public static TimeSpan DEFAULT_DELAY_BETWEEN_INVENTORY = TimeSpan.FromMilliseconds(500);
-        protected Timers.Timer AutoInventoryTimer = new Timers.Timer() { AutoReset = true };
-        private void AutoInventoryTimer_Tick(object sender, Timers.ElapsedEventArgs e) { this.Inventory(); }
+        protected Timer AutoInventoryTimer = new Timer() { AutoReset = true };
+        private void AutoInventoryTimer_Tick(object sender, ElapsedEventArgs e) { this.Inventory(); }
         public virtual void StartContinousInventory()
         {
             this.AutoInventoryTimer.Elapsed += AutoInventoryTimer_Tick;

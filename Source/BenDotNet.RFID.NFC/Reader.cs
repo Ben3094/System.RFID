@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics.Range;
+using BenDotNet.Numerics;
 
 namespace BenDotNet.RFID.NFC
 {

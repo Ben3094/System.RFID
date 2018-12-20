@@ -57,29 +57,24 @@ namespace BenDotNet.RFID.UHFEPC
             foreach (char word in words)
             {
                 byte[] bytes = BitConverter.GetBytes(word);
-                yield return bytes[0];
                 yield return bytes[1];
+                yield return bytes[0];
             }
         }
 
-        public static IEnumerable<char> GetWordsFromBytes(IEnumerable<byte> bytes, byte missingByteCompletion = 0)
+        public static IEnumerable<char> GetWordsFromBytes(IEnumerable<byte> bytes)
         {
-            if (IsMissingByteForConvertionInWords(bytes))
+            if (bytes.Count() % 2 == 0)
             {
-                bytes = new List<byte>(bytes);
-                ((List<byte>)bytes).Add(missingByteCompletion);
+                IEnumerator<byte> enumerator = bytes.GetEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    char temp = (char)(enumerator.Current << 8);
+                    enumerator.MoveNext();
+                    yield return (char)(temp | (char)enumerator.Current);
+                }
             }
-            IEnumerator<byte> enumerator = bytes.GetEnumerator();
-            char temp = (char)(enumerator.Current << 8);
-            enumerator.MoveNext();
-            yield return (char)(temp | (char)enumerator.Current);
-            if (!enumerator.MoveNext())
-                yield break;
-        }
-
-        public static bool IsMissingByteForConvertionInWords(IEnumerable<byte> bytes)
-        {
-            return (bytes.Count() & 1) != 1;
+            else throw new ArgumentException("Not couples bytes for conversion in char");
         }
         #endregion
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
@@ -190,70 +191,73 @@ namespace BenDotNet.RFID.UHFEPC
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        private IEnumerable<byte> readWord(int wordOffset, byte wordCount = byte.MaxValue)
+        {
+            ReadCommand readCommand = new ReadCommand(this.memoryBank, wordOffset, wordCount);
+            ReadReply readReply = (ReadReply)this.tag.Execute(readCommand);
+            return Helpers.GetBytesFromWords(readReply.MemoryWords);
+        }
+
         public override void Flush()
         {
             foreach (Tuple<int, IEnumerable<byte>> pendingBuffer in pendingBuffers)
             {
-                IEnumerable<byte> pendingBytes = pendingBuffer.Item2;
-                if (Helpers.IsMissingByteForConvertionInWords(pendingBuffer.Item2))
-                {
-                    int lastByteOffset = pendingBuffer.Item1 + pendingBuffer.Item2.Count();
-                    ReadCommand readCommand = new ReadCommand(this.memoryBank, lastByteOffset, 1);
-                    ReadReply readReply = (ReadReply)this.tag.Execute(readCommand);
-                    byte lastByte = Helpers.GetBytesFromWords(readReply.MemoryWords).ElementAt(1);
-                    pendingBytes = new List<byte>(pendingBytes);
-                    ((List<byte>)pendingBytes).Add(lastByte);
-                }
+                List<byte> pendingBytes = new List<byte>();
+                int wordOffset = pendingBuffer.Item1 / 2;
+                bool hasPreviousRemainingWord = pendingBuffer.Item1 % 2 > 0;
+                bool hasNextRemainingWord = ((pendingBuffer.Item2.Count() % 2) > 0) ^ hasPreviousRemainingWord;
+
+                if (hasPreviousRemainingWord)
+                    pendingBytes.Add(readWord(wordOffset, 1).First());
+                pendingBytes.AddRange(pendingBuffer.Item2);
+                if (hasNextRemainingWord)
+                    pendingBytes.Add(readWord((pendingBuffer.Item1 + pendingBuffer.Item2.Count()) / 2, 1).Last());
 
                 char[] words = Helpers.GetWordsFromBytes(pendingBytes).ToArray();
-                BlockWriteCommand blockWriteCommand = new BlockWriteCommand(this.memoryBank, words, pendingBuffer.Item1);
-                this.tag.Execute(blockWriteCommand);
+
+                try //TODO: Avoid this try-catch by knowing tag capabilities
+                {
+                    this.tag.Execute(new BlockWriteCommand(this.memoryBank, ref words, wordOffset));
+                }
+                catch (Exception) //TODO: Correct this exception to correctly handle exceptions
+                {
+                    GS1Helpers.FallbackBlockWrite(this.tag, this.memoryBank, ref words, wordOffset);
+                }
             }
-            //CAUTION: If odd, buffer in byte can override the last byte !
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            int originalWordsOffset = offset / 2;
-            int wordsOffset = originalWordsOffset;
-            int wordsCount = count / 2;
-            bool hasPreviousHalfWord = wordsOffset != (float)(offset / 2f);
-            bool hasAfterHalfWord = wordsCount != (float)(count / 2f);
+            bool hasPreviousRemainingWord = offset % 2 > 0;
+            bool hasNextRemainingWord = ((count % 2) > 0) ^ hasPreviousRemainingWord;
+            int previousRemainingWordOffset = hasPreviousRemainingWord ? 1 : 0;
+            int wordsOffset = (int)Math.Ceiling(offset / 2f);
+            int wordsCount = (int)Math.Floor((count - previousRemainingWordOffset)/ 2f);
+
+            int wordIndex = wordsOffset; //Initiate the position
 
             try
             {
-                if (hasPreviousHalfWord)
-                {
-                    Array.Copy(readWord(wordsOffset, 1).ToArray(), 1, buffer, 0, 1);
-                    wordsOffset++;
-                }
+                if (hasPreviousRemainingWord)
+                    buffer[0] = readWord(wordsOffset - 1, 1).Last();
 
                 //Maximum word memory readable for a command
-                for (; wordsOffset < wordsOffset + ((wordsCount / byte.MaxValue) * wordsCount); wordsOffset += byte.MaxValue)
-                    readWord(wordsOffset).ToArray().CopyTo(buffer, wordsOffset - originalWordsOffset);
+                int maxFullBlockAddressable = wordsOffset + ((wordsCount / byte.MaxValue) * byte.MaxValue);
+                for (; wordIndex < maxFullBlockAddressable; wordIndex += byte.MaxValue)
+                    readWord(wordIndex).ToArray().CopyTo(buffer, previousRemainingWordOffset + ((wordIndex - wordsOffset) * 2));
 
-                //Uncomplete value of memory 
-                IEnumerable<byte> BYTES = readWord(wordsOffset, (byte)(wordsCount % byte.MaxValue));
-                BYTES.ToArray().CopyTo(buffer, wordsOffset - originalWordsOffset);
+                if (wordIndex < wordsOffset + wordsCount)
+                    readWord(wordIndex, (byte)(wordsCount % byte.MaxValue)).ToArray().CopyTo(buffer, previousRemainingWordOffset + ((wordIndex - wordsOffset) * 2));
+                wordIndex += wordsCount % byte.MaxValue;
 
-                if (hasAfterHalfWord)
-                {
-                    wordsOffset += BYTES.Count();
-                    buffer[wordsOffset - originalWordsOffset] = readWord(wordsOffset, 1).Last();
-                }
+                if (hasNextRemainingWord)
+                    buffer[previousRemainingWordOffset + ((wordIndex - wordsOffset) * 2)] = readWord(wordsOffset + wordsCount + 1, 1).First();
             }
-            catch (IndexOutOfRangeException) {  }
+            catch (IndexOutOfRangeException) { }
 
-            return ((wordsOffset - originalWordsOffset) * 2)
-                - (hasPreviousHalfWord ? 1 : 0)
-                + (hasAfterHalfWord ? 1 : 0);
-
-            IEnumerable<byte> readWord(int readWordOffset, byte wordCount = byte.MaxValue)
-            {
-                ReadCommand readCommand = new ReadCommand(this.memoryBank, readWordOffset, wordCount);
-                ReadReply readReply = (ReadReply)this.tag.Execute(readCommand);
-                return Helpers.GetBytesFromWords(readReply.MemoryWords);
-            }
+            return ((wordIndex - wordsOffset) * 2)
+                + previousRemainingWordOffset
+                + (hasNextRemainingWord ? 1 : 0);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -268,7 +272,7 @@ namespace BenDotNet.RFID.UHFEPC
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            this.pendingBuffers.Add(new Tuple<int, IEnumerable<byte>>(offset, buffer));
+            this.pendingBuffers.Add(new Tuple<int, IEnumerable<byte>>(offset, buffer.Take(count)));
 
             if (this.AutoFlush)
                 this.Flush();
