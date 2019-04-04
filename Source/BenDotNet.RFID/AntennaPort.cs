@@ -20,9 +20,9 @@ namespace BenDotNet.RFID
             {
                 switch (this.ConnectedLoad.Real)
                 {
-                    case double.NaN:
+                    case float.NaN:
                         return AntennaPortStatus.Unknown;
-                    case double.PositiveInfinity:
+                    case float.PositiveInfinity:
                         return AntennaPortStatus.Floating;
                     case 0:
                         return AntennaPortStatus.Grounded;
@@ -54,11 +54,11 @@ namespace BenDotNet.RFID
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public const double RF_LINE_DEFAULT_RESISTANCE = 50; //Ohm
+        public const float RF_LINE_DEFAULT_RESISTANCE = 50; //Ohm
         //TODO: add frequency dependent value handling
-        public static Complex LoadFromReflectionCoefficient(double reflectionCoeffient, double lineResistance)
+        public static Complex LoadFromReflectionCoefficient(float reflectionCoeffient, float lineResistance)
         {
-            double loadResistance = Math.Abs(lineResistance * ((1 + reflectionCoeffient) / (1 - reflectionCoeffient)));
+            float loadResistance = Math.Abs(lineResistance * ((1 + reflectionCoeffient) / (1 - reflectionCoeffient)));
             return new Complex(loadResistance, 0);
         }
     }

@@ -10,6 +10,8 @@ namespace BenDotNet.RFID
     //TODO: Plan conversion between tag type and handle transfer between reader (a UHF tag can have a HF antenna too and the user can use multiple reader)
     public abstract class Tag : INotifyPropertyChanged
     {
+        public const string NOT_GENUINE_TAG_ARGUMENT_EXCEPTION_MESSAGE_FORMAT = "Not a genuine {0} tag";
+
         public Tag(byte[] uid)
         {
             this.UID = uid;
@@ -17,9 +19,10 @@ namespace BenDotNet.RFID
 
         public byte[] UID { get; private set; }
 
-        #region CONNECTION
+        #region Connection
         public readonly ObservableCollection<DetectionSource> DetectionSources = new ObservableCollection<DetectionSource>();
-        //TODO: Always sort detecting antennas by best signal quality
+        public IOrderedEnumerable<DetectionSource> DetectionSourcesByRSSI => this.DetectionSources.OrderBy(detectionSource => detectionSource.RSSI);
+        public IOrderedEnumerable<DetectionSource> LastDetectedSources => this.DetectionSources.OrderBy(detectionSource => detectionSource.Time);
 
         public Reply Execute(Command command)
         {
@@ -27,11 +30,11 @@ namespace BenDotNet.RFID
         }
         #endregion
 
-        #region MEMORY
+        #region Memory
         public abstract Stream Memory { get; }
         #endregion
 
-        #region PROPERTIES CHANGED EVENT HANDLER
+        #region Properties changed event handler
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -45,6 +48,7 @@ namespace BenDotNet.RFID
     //    internal MultiTypeTag(byte[] uid) : base(uid) { }
 
     //    public ObservableCollection<Tag> Value = new ObservableCollection<Tag>();
+    //    //TODO: Integrate a "mini" GlobalTagCache to manage tags
 
     //    public override Stream Memory => throw new NotImplementedException();
     //}

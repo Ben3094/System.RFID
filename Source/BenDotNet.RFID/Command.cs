@@ -6,18 +6,11 @@ using System.Runtime.CompilerServices;
 
 namespace BenDotNet.RFID
 {
-    public abstract class Command : INotifyPropertyChanged
+    public abstract class Command
     {
-        #region PROPERTIES CHANGED EVENT HANDLER
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
     }
 
-    public class Reply : INotifyPropertyChanged
+    public class Reply
     {
         public Reply(ref Command associatedCommand)
         {
@@ -36,14 +29,6 @@ namespace BenDotNet.RFID
         public static Type AssociatedCommandType = null;
 
         //TODO : How to handle readonly reply received by the reader ?
-
-        #region PROPERTIES CHANGED EVENT HANDLER
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]

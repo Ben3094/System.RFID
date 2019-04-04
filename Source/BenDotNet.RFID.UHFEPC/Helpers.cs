@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.HashFunction.CRC;
+using System.Collections;
 
 namespace BenDotNet.RFID.UHFEPC
 {
@@ -42,13 +43,22 @@ namespace BenDotNet.RFID.UHFEPC
             }
             return result;
         }
+        #endregion
 
-        public static ICRCConfig DEFAULT_CRC16_METHOD = CRCConfig.CRC16_CCITTFALSE;
+        #region Cyclic Redundancy Check
+        public static byte[] GetCRC(byte[] value, ICRCConfig crcConfig)
+        {
+            return CRCFactory.Instance.Create(crcConfig).ComputeHash(value).Hash;
+        }
+
+        public static ICRCConfig DEFAULT_CRC16_CONFIG = CRCConfig.CRC16_CCITTFALSE;
         public static ushort GetCRC16(byte[] value)
         {
-            byte[] crcPieces = CRCFactory.Instance.Create(DEFAULT_CRC16_METHOD).ComputeHash(value).Hash;
+            byte[] crcPieces = GetCRC(value, DEFAULT_CRC16_CONFIG);
             return (ushort)(crcPieces[1] | (crcPieces[0] >> 8));
         }
+
+        public static ICRCConfig DEFAULT_CRC5_CONFIG = CRCConfig.CRC5_EPC;
         #endregion
 
         #region Word conversion
@@ -77,5 +87,17 @@ namespace BenDotNet.RFID.UHFEPC
             else throw new ArgumentException("Not couples bytes for conversion in char");
         }
         #endregion
+
+        public static void FallbackBlockWrite(Tag tag, Tag.MemoryBank memoryBank, ref IEnumerable<char> data, int offset = 0)
+        {
+            int index = 0;
+            IEnumerator<char> enumerator = data.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                char dataPiece = enumerator.Current;
+                tag.Execute(new WriteCommand(memoryBank, ref dataPiece, offset + index));
+                index++;
+            }
+        }
     }
 }

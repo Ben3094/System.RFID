@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>0.2.6</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>2019 Benjamin Saggin</Copyright>
+    <PackageProjectUrl>https://github.com/Ben3094/BenDotNet.RFID</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -13,11 +18,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenDotNet.Numerics.Range" Version="1.0.0" />
+    <PackageReference Include="BenDotNet.Numerics.Range" Version="1.2.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BenDotNet.RFID\BenDotNet.RFID.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,25 +1,42 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace BenDotNet.RFID.UHFEPC
 {
     #region Core definition
-    public enum CommandType { Mandatory, Optional, Proprietary, Custom }
-
-    public abstract class GS1Command : BenDotNet.RFID.UHFEPC.Command
+    public enum CommandType
     {
-        public GS1Command() { }
+        /// <summary>
+        /// Conforming Tags shall support all mandatory commands. Conforming Interrogators shall support all mandatory commands.
+        /// </summary>
+        Mandatory,
+        /// <summary>
+        /// Conforming Tags may or may not support optional commands. Conforming Interrogators may or may not support optional commands. If a Tag or an Interrogator implements an optional command then it shall implement it in the manner specified in this protocol.
+        /// </summary>
+        Optional,
+        /// <summary>
+        /// Proprietary commands may be enabled in conformance with this protocol, but are not specified herein. All proprietary commands shall be capable of being permanently disabled. Proprietary commands are intended for manufacturing purposes and shall not be used in field-deployed RFID systems. 
+        /// </summary>
+        Proprietary,
+        /// <summary>
+        /// Custom commands may be enabled in conformance with this protocol, but are not specified herein. An Interrogator shall issue a custom command only after (1) singulating a Tag, and (2) reading (or having prior knowledge of) the Tag manufacturer’s identification in the Tag’s TID memory. An Interrogator shall use a custom command only in accordance with the specifications of the Tag manufacturer identified in the TID. A custom command shall not solely duplicate the functionality of any mandatory or optional command defined in this protocol by a different method.
+        /// </summary>
+        Custom
+    }
+
+    public abstract class Command : RFID.Command
+    {
+        public Command() { }
+
         public abstract CommandType Type { get; }
         public abstract BitArray CommandCode { get; }
     }
 
-    public abstract class GS1Reply : BenDotNet.RFID.UHFEPC.Reply
+    public abstract class Reply : RFID.Reply
     {
-        public GS1Reply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
-        public GS1Reply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }
+        public Reply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
+        public Reply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }
 
         public const bool ERROR_HEADER = true;
         public const bool SUCCESS_HEADER = false;
@@ -29,7 +46,7 @@ namespace BenDotNet.RFID.UHFEPC
         public virtual bool Header => SUCCESS_HEADER;
     }
 
-    public class ErrorReply : GS1Reply
+    public class ErrorReply : Reply
     {
         public ErrorReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
         public ErrorReply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }
@@ -38,7 +55,7 @@ namespace BenDotNet.RFID.UHFEPC
 
         /// <remarks>
         /// If a Tag supports error-specific codes then it shall use the error-specific codes
-        /// If a Tag does not support error-specific codes then it shall backscatter error code 000011112 (indicating a non-specific error)
+        /// If a Tag does not support error-specific codes then it shall backscatter error code 00001111 (indicating a non-specific error)
         /// A Tag shall backscatter error codes only from the open or secured states
         /// A Tag shall not backscatter an error code if it receives an invalid or improper access command, or an access command with an incorrect handle
         /// If an error is described by more than one error code then the more specific error code shall take precedence and shall be the code that the Tag backscatters
@@ -65,20 +82,33 @@ namespace BenDotNet.RFID.UHFEPC
         public ErrorCodeEnum Error { get { return (ErrorCodeEnum)this.ErrorCode; } }
     }
 
-    public class DelayedTagReply : GS1Reply
+    public class ImediateTagReply : Reply
     {
+        public ImediateTagReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
+        public ImediateTagReply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }
+    }
+
+    public class DelayedTagReply : Reply
+    {
+        public const bool DEFAULT_HEADER = false;
+
         public DelayedTagReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
         public DelayedTagReply(ref object originalReply, ref RFID.Command associatedCommand) : base(ref associatedCommand, ref originalReply) { }
     }
-    public class InProcessTagReply : GS1Reply
+    public class InProcessTagReply : Reply
     {
+        public static BitArray BARKER_CODE = new BitArray(new bool[] { true, true, true, false, false, true, false });
+
         public InProcessTagReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
         public InProcessTagReply(ref object originalReply, ref RFID.Command associatedCommand) : base(ref associatedCommand, ref originalReply) { }
+
+        public readonly bool IsDone;
+        public readonly bool IsError;
     }
     #endregion
 
     #region Select commands
-    public abstract class BaseSelectCommand : GS1Command
+    public abstract class BaseSelectCommand : Command
     {
     }
 
@@ -92,7 +122,7 @@ namespace BenDotNet.RFID.UHFEPC
     #endregion
 
     #region Inventory commands
-    public abstract class BaseInventoryCommand : GS1Command
+    public abstract class BaseInventoryCommand : Command
     {
 
     }
@@ -107,7 +137,7 @@ namespace BenDotNet.RFID.UHFEPC
             S3 = 0b11
         }
     }
-    public class QueryReply : GS1Reply
+    public class QueryReply : Reply
     {
         public QueryReply(ref RFID.Command associatedCommand) : base(ref associatedCommand)
         {
@@ -152,7 +182,7 @@ namespace BenDotNet.RFID.UHFEPC
         public static bool[] ACK_COMMAND_CODE = new bool[] { false, true };
         public override BitArray CommandCode => new BitArray(ACK_COMMAND_CODE);
     }
-    public class ACKReply : GS1Reply
+    public class ACKReply : Reply
     {
         public ACKReply(ref RFID.Command associatedCommand) : base(ref associatedCommand)
         {
@@ -173,12 +203,22 @@ namespace BenDotNet.RFID.UHFEPC
     #endregion
 
     #region Access commands
-    public abstract class BaseAccessCommand : GS1Command
-    {
-    }
+    public abstract class BaseAccessCoreCommand : Command { }
 
+        //Subclass of access commands
+        public abstract class CoreCommand : BaseAccessCoreCommand { }
+        public abstract class SecurityCommand : BaseAccessCoreCommand
+        {
+            /// <summary>
+            /// Specifies whether a Tag backscatters its response or stores the response in its ResponseBuffer
+            /// </summary>
+            public bool SendReponse;
+        }
+        public abstract class FileCommand : BaseAccessCoreCommand { }
+
+        #region Core commands
     [ReplyType(typeof(ReqRNReply))]
-    public class ReqRNCommand : BaseAccessCommand
+    public class ReqRNCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Mandatory;
 
@@ -196,17 +236,17 @@ namespace BenDotNet.RFID.UHFEPC
         }
     }
 
-    public abstract class BaseMemoryAccessCommand : BaseAccessCommand
+    public abstract class BaseMemoryAccessCommand : CoreCommand
     {
-        public BaseMemoryAccessCommand(GS1Tag.MemoryBank memoryBank) { this.MemoryBank = memoryBank; }
-        public BaseMemoryAccessCommand(GS1Tag.MemoryBank memoryBank, int offset) { this.MemoryBank = memoryBank; this.Offset = offset; }
-        public readonly GS1Tag.MemoryBank MemoryBank;
+        public BaseMemoryAccessCommand(Tag.MemoryBank memoryBank) { this.MemoryBank = memoryBank; }
+        public BaseMemoryAccessCommand(Tag.MemoryBank memoryBank, int offset) { this.MemoryBank = memoryBank; this.Offset = offset; }
+        public readonly Tag.MemoryBank MemoryBank;
 
         public int Offset;
         public byte[] WordPtr
         {
-            get => Helpers.CompileExtensibleBitVector(this.Offset);
-            set => this.Offset = Helpers.ParseExtensibleBitVector(value);
+            get => UHFEPC.Helpers.CompileExtensibleBitVector(this.Offset);
+            set => this.Offset = UHFEPC.Helpers.ParseExtensibleBitVector(value);
         }
     }
 
@@ -217,8 +257,8 @@ namespace BenDotNet.RFID.UHFEPC
         public const byte READ_COMMAND_CODE = 0b11000010;
         public override BitArray CommandCode => new BitArray(READ_COMMAND_CODE);
 
-        public ReadCommand(GS1Tag.MemoryBank memoryBank, byte wordCount = 0) : base(memoryBank) { this.WordCount = wordCount; }
-        public ReadCommand(GS1Tag.MemoryBank memoryBank, int offset, byte wordCount) : base(memoryBank, offset) { this.WordCount = wordCount; }
+        public ReadCommand(Tag.MemoryBank memoryBank, byte wordCount = 0) : base(memoryBank) { this.WordCount = wordCount; }
+        public ReadCommand(Tag.MemoryBank memoryBank, int offset, byte wordCount) : base(memoryBank, offset) { this.WordCount = wordCount; }
 
         /// <summary>
         /// 
@@ -228,7 +268,7 @@ namespace BenDotNet.RFID.UHFEPC
         /// </remarks>
         public readonly byte WordCount;
     }
-    public class ReadReply : GS1Reply
+    public class ReadReply : Reply
     {
         static ReadReply() { AssociatedCommandType = typeof(ReadCommand); }
         public ReadReply(ref object originalReply, ref RFID.Command associatedCommand) : base(ref associatedCommand, ref originalReply) { }
@@ -243,13 +283,13 @@ namespace BenDotNet.RFID.UHFEPC
         public const byte WRITE_COMMAND_CODE = 0b11000100;
         public override BitArray CommandCode => new BitArray(WRITE_COMMAND_CODE);
 
-        public WriteCommand(GS1Tag.MemoryBank memoryBank, ref char data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
+        public WriteCommand(Tag.MemoryBank memoryBank, ref char data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
 
         public readonly char Data;
     }
 
     [ReplyType(typeof(ReqRNReply))]
-    public class KillCommand : BaseAccessCommand
+    public class KillCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Mandatory;
 
@@ -258,7 +298,7 @@ namespace BenDotNet.RFID.UHFEPC
     }
 
     [ReplyType(typeof(DelayedTagReply))]
-    public class LockCommand : BaseAccessCommand
+    public class LockCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Mandatory;
 
@@ -267,7 +307,7 @@ namespace BenDotNet.RFID.UHFEPC
     }
 
     [ReplyType(typeof(ReqRNReply))]
-    public class AccessCommand : BaseAccessCommand
+    public class AccessCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -282,14 +322,14 @@ namespace BenDotNet.RFID.UHFEPC
         public const byte BLOCKWRITE_COMMAND_CODE = 0b11000111;
         public override BitArray CommandCode => new BitArray(BLOCKWRITE_COMMAND_CODE);
 
-        public BlockWriteCommand(GS1Tag.MemoryBank memoryBank, ref char[] data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
+        public BlockWriteCommand(Tag.MemoryBank memoryBank, ref IEnumerable<char> data, int offset = 0) : base(memoryBank, offset) { this.Data = data; }
 
-        public byte WordCount { get { return (byte)this.Data.Length; } }
-        public readonly char[] Data;
+        public byte WordCount { get { return (byte)this.Data.Count(); } }
+        public readonly IEnumerable<char> Data;
     }
 
     [ReplyType(typeof(DelayedTagReply))]
-    public class BlockEraseCommand : BaseAccessCommand
+    public class BlockEraseCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -297,7 +337,7 @@ namespace BenDotNet.RFID.UHFEPC
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
     
-    public class BlockPermalockCommand : BaseAccessCommand
+    public class BlockPermalockCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -305,7 +345,7 @@ namespace BenDotNet.RFID.UHFEPC
         public override BitArray CommandCode => new BitArray(BLOCKPERMALOCK_COMMAND_CODE);
     }
 
-    public class ReadBufferCommand : BaseAccessCommand
+    public class ReadBufferCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -314,15 +354,17 @@ namespace BenDotNet.RFID.UHFEPC
     }
 
     [ReplyType(typeof(DelayedTagReply))]
-    public class UntraceableCommand : BaseAccessCommand
+    public class UntraceableCommand : CoreCommand
     {
         public override CommandType Type => CommandType.Optional;
 
         public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000000;
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
+    #endregion
 
-    public class FileOpenCommand : BaseAccessCommand
+        #region File commands
+    public class FileOpenCommand : FileCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -330,14 +372,14 @@ namespace BenDotNet.RFID.UHFEPC
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
-    public class FileListCommand : BaseAccessCommand
+    public class FileListCommand : FileCommand
     {
         public override CommandType Type => CommandType.Optional;
 
         public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000001;
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
-    public class FileListReply : GS1Reply
+    public class FileListReply : Reply
     {
         public FileListReply(ref RFID.Command associatedCommand) : base(ref associatedCommand)
         {
@@ -348,7 +390,7 @@ namespace BenDotNet.RFID.UHFEPC
         }
     }
 
-    public class FilePrivilegeCommand : BaseAccessCommand
+    public class FilePrivilegeCommand : FileCommand
     {
         public override CommandType Type => CommandType.Optional;
 
@@ -356,12 +398,13 @@ namespace BenDotNet.RFID.UHFEPC
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
 
-    public class FileSetupCommand : BaseAccessCommand
+    public class FileSetupCommand : FileCommand
     {
         public override CommandType Type => CommandType.Optional;
 
         public const ushort BLOCKERASE_COMMAND_CODE = 0b1110001000000101;
         public override BitArray CommandCode => new BitArray(BLOCKERASE_COMMAND_CODE);
     }
+        #endregion
     #endregion
 }

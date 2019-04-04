@@ -17,7 +17,8 @@ namespace BenDotNet.RFID
         {
             IEnumerable<Type> availableTagTypes = new List<Type>();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-                ((List<Type>)availableTagTypes).AddRange(assembly.GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic));
+                try { ((List<Type>)availableTagTypes).AddRange(assembly.GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic)); }
+                catch (ReflectionTypeLoadException) { }
             availableTagTypes = availableTagTypes.Distinct();
             availableTagTypes = availableTagTypes.OrderByDescending(type => ReccursiveSearchForBaseType(type, baseTagType));
             availableTagTypes = availableTagTypes.ToArray();
@@ -47,12 +48,12 @@ namespace BenDotNet.RFID
             Tag tag = null;
             try
             {
-                tag = DetectedTags.First(detectedTag => detectedTag.UID == uid);
+                tag = DetectedTags.First(detectedTag => detectedTag.UID.SequenceEqual(uid));
 
                 //TODO: Integrate multi-type tags
-                //if (!(tag.GetType().IsSubclassOf(baseTagType)))
+                //if (!(tag.GetType().IsSubclassOf(baseTagType)) && (!baseTagType.Equals(tag)))
                 //{
-
+                //    DetectedTags.
                 //}
             }
             catch (InvalidOperationException)
@@ -74,12 +75,14 @@ namespace BenDotNet.RFID
                     {
                         tag = (Tag)Activator.CreateInstance(correspondingTagType, uid);
 
-                        //TODO: Do not break, create multitypetag if found several corresponding type
+                        //TODO: Do not break, create multitypetag if found several corresponding type, equals in derived branch
                         break;
                     }
                     catch (Exception) { }
                 }
                 if (tag == null) throw new NotImplementedException("Tag type that support UID not found");
+
+                DetectedTags.Add(tag);
             }
 
             //Delete old detection source from the same antenna

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BenDotNet.RFID.UHFEPC
+namespace BenDotNet.RFID.UHFEPC.GS1
 {
-    public partial class GS1Tag : Tag
+    public partial class Tag : UHFEPC.Tag
     {
         public enum MaskDesignerIdentifier
         {
