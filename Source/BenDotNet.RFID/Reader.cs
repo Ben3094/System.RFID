@@ -82,11 +82,15 @@ namespace BenDotNet.RFID
         public static TimeSpan DEFAULT_INVENTORY_DELAY = new TimeSpan(0, 0, 0, 0, DEFAULT_INVENTORY_DELAY_ms);
         public abstract IEnumerable<Tag> Inventory(TimeSpan delay);
         public IEnumerable<Tag> Inventory() { return this.Inventory(DEFAULT_INVENTORY_DELAY); }
-        public virtual Tag Detect(ref Tag tag)
+        public virtual Tag Detect(ref Tag tag, TimeSpan delay)
         {
             Tag targetTag = tag;
-            try { return this.Inventory().First(detectedTag => detectedTag == targetTag); }
+            try { return this.Inventory(delay).First(detectedTag => detectedTag == targetTag); }
             catch (InvalidOperationException) { return null; }
+        }
+        public Tag Detect(ref Tag tag)
+        {
+            return this.Detect(ref tag, DEFAULT_INVENTORY_DELAY);
         }
         
         /// <summary>
