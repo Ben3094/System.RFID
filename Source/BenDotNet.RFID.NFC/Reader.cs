@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BenDotNet.Numerics;
 
 namespace BenDotNet.RFID.NFC
 {
@@ -18,7 +15,8 @@ namespace BenDotNet.RFID.NFC
         }
 
         public const float MIN_ALLOWED_FREQUENCY = 13533 * 10 ^ 3;
+        public override float MinAllowedFrequency => MIN_ALLOWED_FREQUENCY;
         public const float MAX_ALLOWED_FREQUENCY = 13567 * 10 ^ 3;
-        public override Range<float> AllowedFrequencies => new Range<float>(MIN_ALLOWED_FREQUENCY, MAX_ALLOWED_FREQUENCY);
+        public override float MaxAllowedFrequency => MAX_ALLOWED_FREQUENCY;
     }
 }

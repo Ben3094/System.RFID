@@ -1,4 +1,5 @@
 using System;
+using BenDotNet.RFID;
 
 namespace BenDotNet.RFID.UHFEPC.GS1
 {
@@ -8,9 +9,9 @@ namespace BenDotNet.RFID.UHFEPC.GS1
 
         public Tag(byte[] uid) : base(uid)
         {
-            this.IsTIDExtended = ((uid[EXTENDED_TID_FLAG_BYTE_INDEX] >> EXTENDED_TID_FLAG_BYTE_SHIFT) & ONE_BIT_MASK) > 0;
-            this.HasSecurityFlag = ((uid[SECURITY_FLAG_BYTE_INDEX] >> SECURITY_FLAG_BYTE_SHIFT) & ONE_BIT_MASK) > 0;
-            this.HasFileflag = ((uid[SECURITY_FLAG_BYTE_INDEX] >> SECURITY_FLAG_BYTE_SHIFT) & ONE_BIT_MASK) > 0;
+            this.IsTIDExtended = uid[EXTENDED_TID_FLAG_BYTE_INDEX].IsTrue(EXTENDED_TID_FLAG_BYTE_SHIFT);
+            this.HasSecurityFlag = uid[SECURITY_FLAG_BYTE_INDEX].IsTrue(SECURITY_FLAG_BYTE_SHIFT);
+            this.HasFileflag = uid[SECURITY_FLAG_BYTE_INDEX].IsTrue(SECURITY_FLAG_BYTE_SHIFT);
 
             ushort firstPart = (ushort)(uid[DESIGNER_IDENTIFIER_BYTE_INDEX] << DESIGNER_IDENTIFIER_BIT_IN_SECOND_PART);
             byte secondPart = (byte)(uid[DESIGNER_IDENTIFIER_BYTE_INDEX + 1] >> (8 - DESIGNER_IDENTIFIER_BIT_IN_SECOND_PART));

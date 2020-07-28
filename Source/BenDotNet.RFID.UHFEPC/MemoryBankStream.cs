@@ -21,9 +21,35 @@ namespace BenDotNet.RFID.UHFEPC
 
         public override bool CanWrite => throw new NotImplementedException();
 
-        public override long Length => throw new NotImplementedException();
+        private const long NOT_INITIALIZED_LENGTH_VALUE = -1;
+        internal long length = NOT_INITIALIZED_LENGTH_VALUE;
+        public override long Length
+        {
+            get
+            {
+                if (length == NOT_INITIALIZED_LENGTH_VALUE)
+                    length = ((ReadReply)this.tag.Execute(new ReadCommand(this.memoryBank))).MemoryWords.Length * 2;
 
-        public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+                return length;
+            }
+        }
+
+        public const string NEGATIVE_POSITION_ARGUMENT_EXCEPTION_MESSAGE = "Position can not be negative";
+        public const string POSITION_OVERFLOWS_END_OF_STREAM_EXCEPTION_MESSAGE = "Position exceeds memory length";
+        private long position = 0;
+        public override long Position
+        {
+            get => position;
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException(NEGATIVE_POSITION_ARGUMENT_EXCEPTION_MESSAGE);
+                else if (value >= length)
+                    throw new EndOfStreamException(POSITION_OVERFLOWS_END_OF_STREAM_EXCEPTION_MESSAGE);
+                else
+                    position = value;
+            }
+        }
 
         public override void Flush()
         {
@@ -43,14 +69,7 @@ namespace BenDotNet.RFID.UHFEPC
             
                 IEnumerable<char> words = Helpers.GetWordsFromBytes(pendingBytes).ToArray();
 
-                try //TODO: Avoid this try-catch by knowing tag capabilities
-                {
-                    this.tag.Execute(new BlockWriteCommand(this.memoryBank, ref words, wordOffset));
-                }
-                catch (Exception) //TODO: Correct this exception to correctly handle exceptions
-                {
-                    Helpers.FallbackBlockWrite(this.tag, this.memoryBank, ref words, wordOffset);
-                }
+                this.tag.Write(this.memoryBank, ref words, wordOffset);
             }
         }
 
@@ -90,11 +109,23 @@ namespace BenDotNet.RFID.UHFEPC
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            long newPosition = offset;
+            switch (origin)
+            {
+                case SeekOrigin.Current:
+                    newPosition += this.Position;
+                    break;
+                case SeekOrigin.End:
+                    newPosition += this.Length - 1;
+                    break;
+            }
+            this.Position = newPosition;
+            return newPosition;
         }
 
         public override void SetLength(long value)
         {
+            //TODO redefine length
             throw new NotImplementedException();
         }
 
@@ -110,8 +141,8 @@ namespace BenDotNet.RFID.UHFEPC
         private IEnumerable<byte> readWord(int wordOffset, byte wordCount = byte.MaxValue)
         {
             ReadCommand readCommand = new ReadCommand(this.memoryBank, wordOffset, wordCount);
-            ReadReply readReply = (ReadReply)this.tag.Execute(readCommand);
-            return UHFEPC.Helpers.GetBytesFromWords(readReply.MemoryWords);
+            RFID.Reply readReply = this.tag.Execute(readCommand);
+            return Helpers.GetBytesFromWords(((ReadReply)readReply).MemoryWords);
         }
         #endregion
     }

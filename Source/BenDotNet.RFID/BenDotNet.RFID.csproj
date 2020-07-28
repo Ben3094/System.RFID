@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.7</Version>
+    <Version>0.2.9</Version>
     <PackageProjectUrl>https://github.com/Ben3094/BenDotNet.RFID</PackageProjectUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
     <Copyright>2019 Benjamin Saggin</Copyright>
@@ -22,10 +22,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\Build\Release</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="BenDotNet.Numerics.Range" Version="1.2.3" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\LICENSE">

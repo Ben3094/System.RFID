@@ -1,0 +1,47 @@
+001	Impinj	040	Monza 1	050	Monza 1	07x	Monza 2	09x	Monza 3	100	Monza 4D	10C	Monza 4E	104	Monza 4U	105	Monza 4QT	130	Monza 5	140	Monza X2K	160	Monza R6	170	Monza R6-P	171	Monza S6-C
+002	Texas Instruments
+003	Alien Technology	411	Higgs 2	412	Higgs 3	414	Higgs 4	811	Higgs-EC
+004	Intelleflex
+005	Atmel
+006	NXP Semiconductors	003	G2XM	004	G2XL	806	G2iL	906	G2iL	B06	G2iL	807	G2iL+	907	G2iL+	B07	G2iL+	80A	G2iM	80B	G2iM+	80D	UCODE I2C	88D	UCODE I2C	810	UCODE 7	811	UCODE 7m	D12	UCODE 7xm	D92	UCODE 7xm+	892	UCODE DNA
+007	ST Microelectronics
+008	EP Microelectronics
+009	Motorola
+00A	Sentech Snd Bhd
+00B	EM Microelectronics	001	EM4324 V1	002	EM4324 V2	04x	EM4325	08x	EM4124	0Cx	EM4126	0A0	EM4423 S	0A1	EM4423 L	0A2	EM4423 S+	0A3	EM4423 L+
+00C	Renesas Technology Corp.
+00D	Mstar
+00E	Tyco International
+00F	Quanray Electronics	352	Qstar-35
+010	Fujitsu
+011	LSIS
+012	CAEN RFID srl
+013	Productivity Engineering Gesellschaft fuer IC Design mbH
+014	Federal Electric Corp.
+015	ON Semiconductor
+016	Ramtron
+017	Tego
+018	Ceitec S.A.
+019	CPA Wernher von Braun
+01A	TransCore
+01B	Nationz
+01C	Invengo
+01D	Kiloway
+01E	Longjing Microelectronics Co. Ltd.
+01F	Chipus Microelectronics
+020	ORIDAO
+021	Maintag	001	FLYchip
+022	Yangzhou Daoyuan Microelectronics Co. Ltd
+023	Gate Elektronik
+024	RFMicron, Inc.	40x	Magnus
+025	RST-Invent LLC
+026	Crystone Technology
+027	Sanghai Fudan Microelectronics Group
+028	Farsens
+029	Giesecke & Devrient GmbH
+02A	AWID
+02B	Unitec Semicondutores S/A
+02C	Q-Free ASA
+02D	Valid S.A.
+02E	Fraunhofer IPMS
+

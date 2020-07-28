@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.7</Version>
+    <Version>0.2.9</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Copyright>2019 Benjamin Saggin</Copyright>
@@ -20,7 +20,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenDotNet.Numerics.Range" Version="1.2.3" />
     <PackageReference Include="System.Data.HashFunction.CRC" Version="2.0.0" />
   </ItemGroup>
 

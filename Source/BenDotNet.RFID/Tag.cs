@@ -19,15 +19,15 @@ namespace BenDotNet.RFID
 
         public byte[] UID { get; private set; }
 
-        #region Connection
-        public readonly ObservableCollection<DetectionSource> DetectionSources = new ObservableCollection<DetectionSource>();
-        public IOrderedEnumerable<DetectionSource> DetectionSourcesByRSSI => this.DetectionSources.OrderBy(detectionSource => detectionSource.RSSI);
-        public IOrderedEnumerable<DetectionSource> LastDetectedSources => this.DetectionSources.OrderBy(detectionSource => detectionSource.Time);
-
         public Reply Execute(Command command)
         {
             return this.DetectionSources.First().Antenna.ContainerReader.Execute(this, command);
         }
+
+        #region Connection
+        public readonly ObservableCollection<DetectionSource> DetectionSources = new ObservableCollection<DetectionSource>();
+        public IOrderedEnumerable<DetectionSource> DetectionSourcesByRSSI => this.DetectionSources.OrderBy(detectionSource => detectionSource.RSSI);
+        public IOrderedEnumerable<DetectionSource> LastDetectedSources => this.DetectionSources.OrderBy(detectionSource => detectionSource.Time);
         #endregion
 
         #region Memory

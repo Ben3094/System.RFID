@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Timers;
-using BenDotNet.Numerics;
 
 namespace BenDotNet.RFID
 {
@@ -13,6 +13,7 @@ namespace BenDotNet.RFID
 
     public abstract class Reader : INotifyPropertyChanged
     {
+        static Reader() { UpdateAvailableReaderTypes(); }
         public Reader()
         {
             foreach (AntennaPort antennaPort in this.AntennaPorts)
@@ -94,30 +95,48 @@ namespace BenDotNet.RFID
         }
         
         /// <summary>
-        /// Frequency used by the reader to operate
+        /// Frequency (in Hertz) used by the reader to operate
         /// </summary>
         /// <remarks>
         /// 0 for automatic
-        /// Always used the closest value in the allowed frequencies range
+        /// Always use the closest value in the allowed frequencies range
         /// </remarks>
         public abstract float Frequency { get; set; }
-        public abstract Range<float> AllowedFrequencies { get; }
-        
+        public abstract float MaxAllowedFrequency { get; }
+        public abstract float MinAllowedFrequency { get; }
+
         /// <summary>
-        /// Power used by the reader to operate
+        /// Power (in decibel-milliwatt) used by the reader to operate
         /// </summary>
         /// <remarks>
         /// 0 for automatic
-        /// Always used the closest value in the allowed power range
+        /// Always use the closest value in the allowed power range
         /// </remarks>
         public abstract float Power { get; set; }
-        public abstract Range<float> AllowedPowers { get; }
+        public abstract float MaxAllowedPower { get; }
 
         #region Properties changes event handler
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        #region Auto-detection
+        public static ReadOnlyCollection<Type> AvailableReaderTypes { get => availableReaderTypes; }
+        internal static ReadOnlyCollection<Type> availableReaderTypes;
+        public static void UpdateAvailableReaderTypes()
+        {
+            Type readerType = typeof(Reader);
+            IEnumerable<Type> availableReaderTypes = new List<Type>();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                try { ((List<Type>)availableReaderTypes).AddRange(assembly.GetTypes().Where(t => (t != readerType) && readerType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic)); }
+                catch (ReflectionTypeLoadException) { }
+            availableReaderTypes = availableReaderTypes.Distinct();
+            availableReaderTypes = availableReaderTypes.OrderByDescending(type => Helpers.ReccursiveSearchForBaseType(type, readerType));
+            availableReaderTypes = availableReaderTypes.ToArray();
+            Reader.availableReaderTypes = ((List<Type>)availableReaderTypes).AsReadOnly();
         }
         #endregion
     }

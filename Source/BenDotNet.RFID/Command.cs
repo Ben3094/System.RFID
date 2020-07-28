@@ -44,4 +44,13 @@ namespace BenDotNet.RFID
                 throw new ArgumentException("Is not a Reply derived type");
         }
     }
+
+    public class ErrorRepliedException : Exception
+    {
+        public readonly Reply ErrorReply;
+        public ErrorRepliedException(Reply errorReply)
+        {
+            this.ErrorReply = errorReply;
+        }
+    }
 }

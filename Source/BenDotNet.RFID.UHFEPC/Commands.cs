@@ -48,8 +48,8 @@ namespace BenDotNet.RFID.UHFEPC
 
     public class ErrorReply : Reply
     {
-        public ErrorReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { }
-        public ErrorReply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { }
+        public ErrorReply(ref RFID.Command associatedCommand) : base(ref associatedCommand) { throw new ErrorRepliedException(this); }
+        public ErrorReply(ref RFID.Command associatedCommand, ref object originalReply) : base(ref associatedCommand, ref originalReply) { throw new ErrorRepliedException(this); }
 
         public override bool Header => ERROR_HEADER;
 
@@ -80,6 +80,11 @@ namespace BenDotNet.RFID.UHFEPC
             NonSpecificError = 0b00001111 //The Tag does not support error-specific codes
         }
         public ErrorCodeEnum Error { get { return (ErrorCodeEnum)this.ErrorCode; } }
+
+        public override string ToString()
+        {
+            return string.Format("{0} ({1}) on {2}", this.Error, this.ErrorCode, this.AssociatedCommand.GetType().Name);
+        }
     }
 
     public class ImediateTagReply : Reply

@@ -20,22 +20,10 @@ namespace BenDotNet.RFID
                 try { ((List<Type>)availableTagTypes).AddRange(assembly.GetTypes().Where(t => (t != baseTagType) && baseTagType.IsAssignableFrom(t) && !t.IsAbstract && t.IsPublic)); }
                 catch (ReflectionTypeLoadException) { }
             availableTagTypes = availableTagTypes.Distinct();
-            availableTagTypes = availableTagTypes.OrderByDescending(type => ReccursiveSearchForBaseType(type, baseTagType));
+            availableTagTypes = availableTagTypes.OrderByDescending(type => Helpers.ReccursiveSearchForBaseType(type, baseTagType));
             availableTagTypes = availableTagTypes.ToArray();
             AvailableTagTypes.Add(baseTagType, ((Type[])availableTagTypes));
             return ((Type[])availableTagTypes);
-        }
-
-        public static int ReccursiveSearchForBaseType(Type targetType, Type baseType)
-        {
-            int reccursion = 0;
-            Type previousType = targetType;
-            while (previousType != baseType)
-            {
-                previousType = previousType.BaseType;
-                reccursion++;
-            }
-            return reccursion;
         }
 
         public static readonly ObservableCollection<Tag> DetectedTags = new ObservableCollection<Tag>();
